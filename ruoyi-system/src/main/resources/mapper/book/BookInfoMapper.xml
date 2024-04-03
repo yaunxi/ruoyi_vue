@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.book.mapper.BookInfoMapper">
+
+    <resultMap type="BookInfo" id="BookInfoResult">
+        <result property="id"      column="id"      />
+        <result property="bookName"    column="book_name"    />
+        <result property="author"     column="author"     />
+        <result property="number"   column="number"   />
+        <result property="publishing"    column="publishing"    />
+        <result property="bookType"      column="book_type"      />
+        <result property="bookPrice"    column="book_price"    />
+        <result property="bookPlace"      column="book_place"      />
+        <result property="inLibraryNum"    column="inlibrary_num"    />
+        <result property="createBy"      column="create_by"      />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"      column="update_by"      />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectBookInfoVo">
+        select id, book_name, author, number, publishing, book_type, book_price, book_place, inlibrary_num, create_by, create_time
+        from book_info
+    </sql>
+
+    <select id="selectBookList" parameterType="BookInfo" resultMap="BookInfoResult">
+--         select id, book_name, author, number, publishing, book_type, book_price, book_place, create_by, create_time
+--         from book_info
+        <include refid="selectBookInfoVo"/>
+        <where>
+            <if test="bookName != null and bookName != ''">
+                AND book_name like concat('%', #{bookName}, '%')
+            </if>
+            <if test="author != null and author != ''">
+                AND author like concat('%', #{author}, '%')
+            </if>
+            <if test="publishing != null and publishing != ''">
+                AND publishing like concat('%', #{publishing}, '%')
+            </if>
+            <if test="bookType != null and bookType != ''">
+                and book_type like concat('%', #{bookType}, '%')
+            </if>
+
+        </where>
+    </select>
+    <select id="selectById" parameterType="String" resultMap="BookInfoResult">
+        <include refid="selectBookInfoVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertBookInfo" parameterType="BookInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into book_info(
+        <if test="bookName != null and bookName !=''">book_name,</if>
+        <if test="number != null and number != 0">number,</if>
+        <if test="bookPrice != null and bookPrice != 0">book_price,</if>
+        <if test="bookPlace != null and bookPlace != ''">book_place,</if>
+        <if test="inLibraryNum != null ">inlibrary_num,</if>
+        <if test="author != null and author != ''">author,</if>
+        <if test="publishing != null and publishing != ''">publishing,</if>
+        <if test="bookType != null and bookType != ''">book_type,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        create_time
+        )values(
+        <if test="bookName != null and bookName !=''">#{bookName},</if>
+        <if test="number != null and number != 0">#{number},</if>
+        <if test="bookPrice != null and bookPrice != 0">#{bookPrice},</if>
+        <if test="bookPlace != null and bookPlace != ''">#{bookPlace},</if>
+        <if test="inLibraryNum != null ">#{inLibraryNum},</if>
+        <if test="author != null and author != ''">#{author},</if>
+        <if test="publishing != null and publishing != ''">#{publishing},</if>
+        <if test="bookType != null and bookType != ''">#{bookType},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+
+    <update id="updateBookInfo" parameterType="BookInfo">
+        update book_info
+        <set><if test="bookName != null and bookName !=''">book_name = #{bookName},</if>
+            <if test="number != null and number != 0">number = #{number},</if>
+            <if test="bookPrice != null and bookPrice != 0">book_price = #{bookPrice},</if>
+            <if test="bookPlace != null and bookPlace != ''">book_place = #{bookPlace},</if>
+            <if test="inLibraryNum != null ">inlibrary_num = #{inLibraryNum},</if>
+            <if test="author != null and author != ''">author = #{author},</if>
+            <if test="publishing != null and publishing != ''">publishing = #{publishing},</if>
+            <if test="bookType != null and bookType != ''">book_type = #{bookType},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where id = #{id}
+    </update>
+</mapper>
