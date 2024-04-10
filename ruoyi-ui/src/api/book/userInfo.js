@@ -34,7 +34,14 @@ export function updateInfo(data) {
     data: data
   })
 }
-
+// 重置密码
+export function resetPwd(data) {
+  return request({
+    url: '/book/userInfo/resetPwd',
+    method: 'put',
+    data: data
+  })
+}
 // 删除用户信息管理
 export function delInfo(id) {
   return request({

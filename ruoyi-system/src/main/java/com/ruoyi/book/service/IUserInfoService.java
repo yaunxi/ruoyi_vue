@@ -1,7 +1,7 @@
-package com.ruoyi.system.service;
+package com.ruoyi.book.service;
 
 import java.util.List;
-import com.ruoyi.system.domain.UserInfo;
+import com.ruoyi.book.domain.UserInfo;
 
 /**
  * 用户信息管理Service接口
@@ -34,6 +34,10 @@ public interface IUserInfoService
      * @return 结果
      */
     public int insertUserInfo(UserInfo userInfo);
+    /**
+     *重置密码
+     * */
+    public int resetPwd(UserInfo userInfo);
 
     /**
      * 修改用户信息管理

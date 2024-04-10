@@ -3,6 +3,8 @@ package com.ruoyi.web.controller.book;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson2.JSONObject;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.utils.SecurityUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +20,8 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.system.domain.UserInfo;
-import com.ruoyi.system.service.IUserInfoService;
+import com.ruoyi.book.domain.UserInfo;
+import com.ruoyi.book.service.IUserInfoService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfo;
 
@@ -80,7 +82,29 @@ public class UserInfoController extends BaseController
     public AjaxResult add(@RequestBody UserInfo userInfo)
     {
         userInfo.setPassword(SecurityUtils.encryptPassword(userInfo.getPassword()));
+        userInfo.setCreateBy("system");
         return toAjax(userInfoService.insertUserInfo(userInfo));
+    }
+    /**
+     * 重置密码
+     */
+    @PreAuthorize("@ss.hasPermi('book:userInfo:resetPwd')")
+    @Log(title = "用户信息管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/resetPwd")
+    public AjaxResult resetPwd(@RequestBody JSONObject jsonObject)
+    {
+        Long id = Long.valueOf(jsonObject.get("id").toString()) ;
+        String password = (String)jsonObject.get("password");
+        String newPassword = (String)jsonObject.get("newPassword");
+        UserInfo user = userInfoService.selectUserInfoById(id);
+        if(user.getPassword().equals(password)){
+            user.setPassword(SecurityUtils.encryptPassword(newPassword));
+            user.setUpdateBy("system");
+            return toAjax(userInfoService.resetPwd(user));
+        }else {
+           return AjaxResult.error("原密码错误！！");
+        }
+
     }
 
     /**
@@ -91,6 +115,7 @@ public class UserInfoController extends BaseController
     @PutMapping
     public AjaxResult edit(@RequestBody UserInfo userInfo)
     {
+        userInfo.setUpdateBy("system");
         return toAjax(userInfoService.updateUserInfo(userInfo));
     }
 

@@ -1,11 +1,11 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.book.service.impl;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.ruoyi.system.mapper.UserInfoMapper;
-import com.ruoyi.system.domain.UserInfo;
-import com.ruoyi.system.service.IUserInfoService;
+import com.ruoyi.book.mapper.UserInfoMapper;
+import com.ruoyi.book.domain.UserInfo;
+import com.ruoyi.book.service.IUserInfoService;
 
 /**
  * 用户信息管理Service业务层处理
@@ -28,6 +28,7 @@ public class UserInfoServiceImpl implements IUserInfoService
     @Override
     public UserInfo selectUserInfoById(Long id)
     {
+
         return userInfoMapper.selectUserInfoById(id);
     }
 
@@ -53,6 +54,15 @@ public class UserInfoServiceImpl implements IUserInfoService
     public int insertUserInfo(UserInfo userInfo)
     {
         return userInfoMapper.insertUserInfo(userInfo);
+    }
+
+    /**
+     * 重置密码
+     * */
+    @Override
+    public int resetPwd(UserInfo userInfo){
+        return userInfoMapper.updateUserInfo(userInfo);
+
     }
 
     /**

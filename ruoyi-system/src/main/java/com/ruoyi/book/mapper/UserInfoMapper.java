@@ -1,7 +1,8 @@
-package com.ruoyi.system.mapper;
+package com.ruoyi.book.mapper;
 
 import java.util.List;
-import com.ruoyi.system.domain.UserInfo;
+
+import com.ruoyi.book.domain.UserInfo;
 
 /**
  * 用户信息管理Mapper接口

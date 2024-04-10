@@ -44,28 +44,6 @@
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['book:userInfo:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['book:userInfo:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
           type="warning"
           plain
           icon="el-icon-download"
@@ -98,6 +76,13 @@
             @click="resetPassword(scope.row)"
             v-hasPermi="['book:userInfo:remove']"
           >密码重置</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-delete"
+            @click="balanceTop(scope.row)"
+            v-hasPermi="['book:userInfo:remove']"
+          >余额充值</el-button>
         <el-button
             size="mini"
             type="text"
@@ -151,7 +136,7 @@
           <el-input v-model="form.age" placeholder="请输入年龄" :disabled ="show"/>
         </el-form-item>
         <el-form-item label="出生日期" prop="birth">
-          <el-input v-model="form.birth" placeholder="请输入出生日期" :disabled ="show" />
+          <el-input v-model="form.birth" placeholder="请输入出生日期" type= "Date" :disabled ="show"  />
         </el-form-item>
         <el-form-item label="联系方式" prop="mobile">
           <el-input v-model="form.mobile" placeholder="请输入联系方式" :disabled ="show" />
@@ -165,20 +150,50 @@
         <el-form-item label="登录密码" prop="password" v-if="isAddShow">
           <el-input v-model="form.password" placeholder="请输入登录密码" v-if = "isAddShow" type="password" show-password/>
         </el-form-item>
-        <el-form-item label="余额" prop="balance">
+        <!-- <el-form-item label="余额" prop="balance">
           <el-input v-model="form.balance" placeholder="请输入余额" :disabled ="show" />
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm" v-if ="isShow ">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+    <el-dialog :title="title" :visible.sync="resetPwdOpen" width="500px" append-to-body>
+        <el-form ref="pwdform" :model="pwdform" :rules="rules1" label-width="80px">
+          <el-form-item label="登录密码" prop="password" >
+            <el-input v-model="pwdform.password" placeholder="请输入登录密码"  type="password" />
+          </el-form-item>
+          <el-form-item label="新密码" prop="newPassword" >
+            <el-input v-model="pwdform.newPassword" placeholder="请输入新登录密码"  type="password" show-password/>
+          </el-form-item>
+          <el-form-item label="确认密码" prop="confirmPassword" >
+            <el-input v-model="pwdform.confirmPassword" placeholder="请再一次输入新密码"  type="password" show-password/>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitPwd">确 定</el-button>
+        <el-button @click="cancelPwd">取 消</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog :title="title" :visible.sync="open2" width="500px" append-to-body>
+        <el-form ref="form2" :model="form2"  label-width="80px">
+          <el-form-item label="余额" prop="balance" >
+          <el-input v-model="form2.balance2" placeholder="请输入余额"  type="number"/>
+        </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submit2">确 定</el-button>
+        <el-button @click="cancel2">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listInfo, getInfo, delInfo, addInfo, updateInfo } from "@/api/book/userInfo";
+import { listInfo, getInfo, delInfo, addInfo, updateInfo,resetPwd } from "@/api/book/userInfo";
+import { number } from 'echarts';
 
 export default {
   name: "Info",
@@ -207,6 +222,8 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      open2: false,
+      resetPwdOpen: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -223,6 +240,8 @@ export default {
       },
       // 表单参数
       form: {},
+      form2:{},
+      pwdform:{},
       // 表单校验
       rules: {
         userName: [
@@ -247,9 +266,32 @@ export default {
           { min: 5, max: 20, message: '用户密码长度必须介于 5 和 20 之间', trigger: 'blur' },
           { pattern: /^[^<>"'|\\]+$/, message: "不能包含非法字符：< > \" ' \\\ |", trigger: "blur" }
         ],
+      },
+      rules1: {
+        newPassword: [
+         { required: true, message: "密码不能为空", trigger: "blur" },
+          { min: 5, max: 20, message: '用户密码长度必须介于 5 和 20 之间', trigger: 'blur' },
+          { pattern: /^[^<>"'|\\]+$/, message: "不能包含非法字符：< > \" ' \\\ |", trigger: "blur" }
+        ],
+        confirmPassword: [
+         { required: true, message: "密码不能为空", trigger: "blur" },
+          { min: 5, max: 20, message: '用户密码长度必须介于 5 和 20 之间', trigger: 'blur' },
+          { pattern: /^[^<>"'|\\]+$/, message: "不能包含非法字符：< > \" ' \\\ |", trigger: "blur" },
+          {
+            validator: (rule,value,callBack)=>{
+              if(value !== this.pwdform.newPassword ){
+                callBack(new Error('两次输入的密码不一致'));
+              }else{
+                callBack();
+              }
+            },
+            trigger: 'blur' 
+          }
+        ],
       }
     };
   },
+  
   created() {
     this.getList();
   },
@@ -268,6 +310,14 @@ export default {
       this.open = false;
       this.reset();
     },
+     cancel2() {
+      this.open2 = false;
+      this.reset2();
+    },
+    cancelPwd(){
+      this.resetPwdOpen = false;
+      this.resetP();
+    },
     // 表单重置
     reset() {
       this.form = {
@@ -283,6 +333,32 @@ export default {
         password: null
       };
       this.resetForm("form");
+    },
+    reset2(){
+      this.form2 = {
+        balance: null
+      };
+      this.resetForm("form2");
+    },
+    resetP(){
+      this.pwdform = {
+        password: null
+      };
+      this.resetForm("pwdform");
+    },
+     /** 重置密码提交按钮 */
+    submitPwd() {
+      this.$refs["pwdform"].validate(valid => {
+        if (valid) {
+          //  console.log("==========="+JSON.stringify(this.pwdform),"++++++++"+this.pwdform.newPassword);
+            resetPwd(this.pwdform).then(response => {
+              this.$modal.msgSuccess("密码重置成功");
+              this.resetPwdOpen = false;
+              this.getList();
+            });
+          
+        }
+      });
     },
     /** 搜索按钮操作 */
     handleQuery() {
@@ -322,6 +398,43 @@ export default {
         this.title = "用户信息详情";
       });
     },
+     /** 重置密码操作 */
+    resetPassword(row) {
+      this.resetP();
+      const id = row.id || this.ids
+      getInfo(id).then(response => {
+        this.pwdform = response.data;
+        this.resetPwdOpen = true;
+        this.title = " 密码重置";
+      });
+    },
+    /** 充值余额操作 */
+    balanceTop(row) {
+      this.reset2();
+      const id = row.id || this.ids
+      getInfo(id).then(response => {
+        this.form2 = response.data;
+        this.open2 = true;
+        this.title = " 余额充值";
+      });
+    },
+    /** 充值余额提交按钮 */
+    submit2() {
+      this.$refs["form2"].validate(valid => {
+        if (valid) {
+           this.form2.balance = parseFloat(this.form2.balance);
+           this.form2.balance2 = parseFloat(this.form2.balance2);
+           this.form2.balance += this.form2.balance2;
+           console.log("2222222222======="+JSON.stringify(this.form2)) ;
+            updateInfo(this.form2).then(response => {
+              this.$modal.msgSuccess("充值成功");
+              this.open2 = false;
+              this.getList();
+            });
+          
+        }
+      });
+    },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
@@ -335,6 +448,7 @@ export default {
         this.title = "修改用户信息管理";
       });
     },
+    
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
